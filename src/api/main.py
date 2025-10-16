@@ -1,46 +1,50 @@
-# src/api/main.py
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from src.api.schemas import UserInput, PredictionResponse
-from src.api.utils import load_kmeans_model, load_cluster_model, assign_cluster, predict_risk
 import pandas as pd
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.decorator import cache
+from fastapi_cache import FastAPICache
+from src.api.utils import MlflowHandler
 import logging
 
 app = FastAPI(title="Credit Risk Bucketing API", version="1.0")
 
-# Load MLflow models once at startup
-try:
-    kmeans_model = load_kmeans_model()
-    logging.info("✅ KMeans model loaded from MLflow.")
-except Exception as e:
-    logging.error(f"Failed to load KMeans model: {e}")
-    kmeans_model = None
+def get_handler():
+    return MlflowHandler()
 
+@app.on_event('startup')
+async def on_startup():
+    FastAPICache.init(InMemoryBackend(), prefix='credit-risk-bucketing-cache')
+
+@app.get("/health")
+@cache(expire=60)
+def health(handler: MlflowHandler= Depends(get_handler)):
+    result= handler.check_mlflow_health()
+    return {'status', result}
 
 @app.post("/predict", response_model=PredictionResponse)
-def predict(input_data: UserInput):
+@cache(expire=60)
+def predict(input_data: UserInput, handler: MlflowHandler= Depends(get_handler)):
+    kmeans_model= handler.load_kmeans_model()
     """Predict cluster and risk probability based on user input."""
-    if kmeans_model is None:
-        raise HTTPException(status_code=500, detail="KMeans model not available")
-
     # Convert user input to DataFrame
-    df = pd.DataFrame([input_data.dict()])
+    df = pd.DataFrame([input_data.model_dump()])
 
     # Step 1: Cluster assignment
     try:
-        cluster = assign_cluster(kmeans_model, df)
+        cluster = handler.assign_cluster(kmeans_model, df)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error clustering user: {e}")
 
     # Step 2: Load cluster model
     try:
-        cluster_model = load_cluster_model(cluster)
+        cluster_model = handler.load_cluster_model(cluster)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cluster model not found: {e}")
 
     # Step 3: Predict risk
     try:
-        risk_label, probability = predict_risk(cluster_model, df)
+        risk_label, probability = handler.predict_risk(cluster_model, df)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
 
@@ -50,7 +54,6 @@ def predict(input_data: UserInput):
         probability=probability
     )
 
-
 @app.get("/")
 def root():
-    return {"message": "Welcome to the Credit Risk Bucketing API!"}
+    return {"message": "Credit Risk Clustering API"}

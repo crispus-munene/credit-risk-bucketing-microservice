@@ -1,0 +1,22 @@
+artifact_path: file:C:/Users/mwang/Desktop/ml/risk-bucketing-microservice/mlruns/1/models/m-569a3271d64d4767b077af3acba2a01a/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.7
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.4.0
+model_id: m-569a3271d64d4767b077af3acba2a01a
+model_size_bytes: 2282917
+model_uuid: m-569a3271d64d4767b077af3acba2a01a
+prompts: null
+run_id: 303db8da5c5c42cb9698fca5020d2e58
+utc_time_created: '2025-10-16 06:49:41.523175'

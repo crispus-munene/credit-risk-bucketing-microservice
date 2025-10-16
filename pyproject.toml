@@ -1,0 +1,24 @@
+[project]
+name = "risk-bucketing-microservice"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "category-encoders>=2.8.1",
+    "fastapi>=0.118.0",
+    "imblearn>=0.0",
+    "kaggle>=1.7.4.5",
+    "lightgbm>=4.6.0",
+    "matplotlib>=3.10.6",
+    "mlflow>=3.4.0",
+    "notebook>=7.4.7",
+    "numpy>=2.3.3",
+    "pandas>=2.3.3",
+    "pydantic>=2.11.10",
+    "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
+    "uvicorn>=0.37.0",
+    "xgboost>=3.0.5",
+    "yellowbrick>=1.5",
+]

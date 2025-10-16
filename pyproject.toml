@@ -16,6 +16,7 @@ dependencies = [
     "numpy>=2.3.3",
     "pandas>=2.3.3",
     "pydantic>=2.11.10",
+    "pytest>=8.4.2",
     "scikit-learn>=1.7.2",
     "seaborn>=0.13.2",
     "uvicorn>=0.37.0",
